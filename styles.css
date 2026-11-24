@@ -416,6 +416,11 @@ legend {
   background: var(--coral-dark);
 }
 
+.submit-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .manager-layout {
   max-width: 1180px;
   min-height: calc(100vh - 82px);
@@ -587,6 +592,10 @@ legend {
   color: var(--white);
   background: var(--sage);
   font-weight: 800;
+}
+
+.toast[data-status="received"] .toast-icon {
+  background: var(--coral);
 }
 
 .toast strong {

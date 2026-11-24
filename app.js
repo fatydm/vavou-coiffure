@@ -31,6 +31,7 @@ const dateInput = document.querySelector("#dateInput");
 const slotsContainer = document.querySelector("#slots");
 const bookingForm = document.querySelector("#bookingForm");
 const formError = document.querySelector("#formError");
+const submitButton = document.querySelector("#submitButton");
 
 function toDateInputValue(date) {
   const year = date.getFullYear();
@@ -190,16 +191,18 @@ function switchView(viewName) {
   if (viewName === "manager") renderReservations();
 }
 
-function showToast(message) {
+function showToast(title, message) {
   const toast = document.querySelector("#toast");
+  document.querySelector("#toastTitle").textContent = title;
   document.querySelector("#toastMessage").textContent = message;
   toast.classList.add("visible");
   window.clearTimeout(showToast.timeout);
   showToast.timeout = window.setTimeout(() => toast.classList.remove("visible"), 4200);
 }
 
-function createReservation(event) {
+async function createReservation(event) {
   event.preventDefault();
+  if (submitButton.disabled) return;
   formError.textContent = "";
 
   const name = document.querySelector("#nameInput").value.trim();
@@ -225,30 +228,70 @@ function createReservation(event) {
     return setError("Ce créneau vient d'être réservé. Veuillez en choisir un autre.");
   }
 
-  const reservation = {
-    id: crypto.randomUUID(),
-    serviceId: state.service.id,
-    professionalId: professional.id,
-    date: state.date,
-    time: state.time,
-    name,
-    phone,
-    email,
-    status: "Confirmé"
+  const dateHeure = `${state.date}T${state.time}:00`;
+  const payload = {
+    prestation: state.service.name,
+    duree: state.service.duration,
+    prix: state.service.price,
+    coiffeur: state.professional === "any" ? "Sans préférence" : professional.name,
+    dateHeure,
+    nom: name,
+    telephone: phone,
+    email
   };
 
-  state.reservations.push(reservation);
-  updateReservationCount();
-  renderReservations();
-  showToast(`${state.time} — ${professional.name} vous attend au salon.`);
-  bookingForm.reset();
-  state.service = null;
-  state.professional = "any";
-  state.date = null;
-  state.time = null;
-  renderServices();
-  renderProfessionals();
-  renderSlots();
+  submitButton.disabled = true;
+  submitButton.dataset.label = submitButton.textContent.trim();
+  submitButton.textContent = "Envoi en cours…";
+
+  try {
+    const response = await fetch("/api/reservations", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const result = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      throw new Error(result?.message || "La réservation n’a pas pu être transmise. Réessayez.");
+    }
+
+    if (result?.status === "confirmed" && typeof result.reference === "string" && result.reference.trim()) {
+      state.reservations.push({
+        id: result.reference,
+        serviceId: state.service.id,
+        professionalId: professional.id,
+        date: state.date,
+        time: state.time,
+        name,
+        phone,
+        email,
+        status: "Confirmé"
+      });
+      updateReservationCount();
+      renderReservations();
+      showToast("Rendez-vous confirmé", `${state.time} — ${professional.name} vous attend au salon.`);
+    } else if (result?.status === "received") {
+      showToast("Demande transmise", "Le salon a bien reçu votre demande.");
+    } else {
+      throw new Error("La réponse du serveur est invalide. Réessayez.");
+    }
+
+    bookingForm.reset();
+    state.service = null;
+    state.professional = "any";
+    state.date = minimumDate;
+    state.time = null;
+    dateInput.value = minimumDate;
+    renderServices();
+    renderProfessionals();
+    renderSlots();
+  } catch (error) {
+    setError(`${error.message} Vos informations sont conservées.`);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = submitButton.dataset.label;
+  }
 }
 
 function setError(message) {
