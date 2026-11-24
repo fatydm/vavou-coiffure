@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vavou Coiffure — Réservation</title>
+    <meta
+      name="description"
+      content="Réservez votre prestation au salon Vavou Coiffure."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Vavou Coiffure">
+        <img src="assets/Logo_Vavou_Coiffure.jpeg" alt="Vavou Coiffure" />
+      </a>
+      <nav class="view-switcher" aria-label="Changer de vue">
+        <button class="view-button active" type="button" data-view="client">
+          Réserver
+        </button>
+        <button class="view-button" type="button" data-view="manager">
+          Vue gérante
+          <span class="badge" id="reservationCount">0</span>
+        </button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="view active" id="clientView">
+        <div class="booking-layout">
+          <aside class="booking-aside">
+            <p class="eyebrow">Vavou Coiffure</p>
+            <h1>Prenez soin de vous.</h1>
+            <p class="aside-copy">
+              Choisissez votre prestation et trouvez l'instant parfait pour passer au salon.
+            </p>
+            <img
+              class="salon-photo"
+              src="assets/Photos_du_salon.jpeg"
+              alt="L'intérieur du salon Vavou Coiffure"
+            />
+          </aside>
+
+          <div class="booking-card">
+            <div class="step-header">
+              <span class="step-number">01</span>
+              <div>
+                <p class="step-kicker">Votre rendez-vous</p>
+                <h2>Réservez en ligne</h2>
+              </div>
+            </div>
+
+            <form id="bookingForm" novalidate>
+              <fieldset>
+                <legend>1. Choisissez une prestation</legend>
+                <div class="service-grid" id="serviceGrid"></div>
+              </fieldset>
+
+              <fieldset>
+                <legend>2. Choisissez votre professionnel</legend>
+                <div class="professional-grid" id="professionalGrid"></div>
+              </fieldset>
+
+              <fieldset>
+                <legend>3. Date et heure</legend>
+                <div class="schedule-grid">
+                  <label class="field">
+                    <span>Date</span>
+                    <input type="date" id="dateInput" required />
+                  </label>
+                  <div class="field">
+                    <span>Heure</span>
+                    <div class="slots" id="slots"></div>
+                  </div>
+                </div>
+              </fieldset>
+
+              <fieldset>
+                <legend>4. Vos informations</legend>
+                <div class="client-fields">
+                  <label class="field">
+                    <span>Prénom et nom</span>
+                    <input
+                      type="text"
+                      id="nameInput"
+                      autocomplete="name"
+                      placeholder="Ex. Camille Dupont"
+                      required
+                    />
+                  </label>
+                  <label class="field">
+                    <span>Téléphone</span>
+                    <input
+                      type="tel"
+                      id="phoneInput"
+                      autocomplete="tel"
+                      placeholder="06 12 34 56 78"
+                      required
+                    />
+                  </label>
+                  <label class="field field-full">
+                    <span>Adresse e-mail</span>
+                    <input
+                      type="email"
+                      id="emailInput"
+                      autocomplete="email"
+                      placeholder="camille@email.fr"
+                      required
+                    />
+                  </label>
+                </div>
+              </fieldset>
+
+              <p class="form-error" id="formError" role="alert"></p>
+              <button class="submit-button" type="submit">
+                Confirmer ma réservation
+                <span aria-hidden="true">→</span>
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="managerView">
+        <div class="manager-layout">
+          <div class="manager-heading">
+            <div>
+              <p class="eyebrow">Espace gérante</p>
+              <h1>Les rendez-vous</h1>
+            </div>
+            <div class="today" id="todayLabel"></div>
+          </div>
+
+          <div class="manager-toolbar">
+            <div class="filter-tabs" role="tablist" aria-label="Filtrer les réservations">
+              <button class="filter-tab active" type="button" data-filter="all">
+                Tous <span id="allCount">0</span>
+              </button>
+              <button class="filter-tab" type="button" data-filter="today">
+                Aujourd'hui
+              </button>
+              <button class="filter-tab" type="button" data-filter="upcoming">
+                À venir
+              </button>
+            </div>
+            <button class="new-button" type="button" id="newBookingButton">
+              <span aria-hidden="true">+</span> Nouvelle réservation
+            </button>
+          </div>
+
+          <div class="table-card">
+            <div class="reservation-table" role="table">
+              <div class="table-row table-head" role="row">
+                <span role="columnheader">Heure</span>
+                <span role="columnheader">Client</span>
+                <span role="columnheader">Prestation</span>
+                <span role="columnheader">Professionnel</span>
+                <span role="columnheader">Statut</span>
+              </div>
+              <div id="reservationRows"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-icon">✓</span>
+      <div>
+        <strong>Réservation confirmée</strong>
+        <p id="toastMessage"></p>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
